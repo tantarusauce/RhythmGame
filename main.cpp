@@ -47,6 +47,30 @@ public:
     }
 };
 
+int Judge(int notePosition, int notesi, int x, int stricy1, int stricy2, int stricy3) {
+
+    int stricy = 0;
+    if (notePosition > 422 - stricy3 && notePosition < 422 + stricy3) {
+        if (notesi == x) {
+            notesi = 0;
+            stricy = 3;
+        }
+    }
+    else if (notePosition > 422 - stricy2 && notePosition < 422 + stricy2) {
+        if (notesi == x) {
+            notesi = 0;
+            stricy = 2;
+        }
+    }
+    else if (notePosition > 422 - stricy1 && notePosition < 422 + stricy1) {
+        if (notesi == x) {
+            notesi = 0;
+            stricy = 1;
+        }
+    }
+    return stricy;
+}
+
 // ProcessMessage 以外の処理を行うスレッド
 DWORD WINAPI MainThread(LPVOID)
 {
@@ -56,6 +80,10 @@ DWORD WINAPI MainThread(LPVOID)
     int stricy1 = 60;
     int stricy2 = 40;
     int stricy3 = 10;
+    bool releaseKey1 = true;
+    bool releaseKey2 = true;
+    bool releaseKey3 = true;
+    bool releaseKey4 = true;
     double startTime = GetNowCount();
     int notes[1028]{};
     double notesSpeed[1028]{};
@@ -70,7 +98,7 @@ DWORD WINAPI MainThread(LPVOID)
     int MusicOFFSET = 0;
     double speed;
     double BPM;
-    bool autoPlay = true;
+    bool autoPlay = false;
     bool MusicPlay = false;
 
     int noteTiming[4] = { 0,0,0,0 };
@@ -156,7 +184,6 @@ DWORD WINAPI MainThread(LPVOID)
             MusicPlay = true;
             PlaySoundMem(Music, DX_PLAYTYPE_BACK);
         }
-
         DrawRotaGraph(50, 0, 0.4, 0, Handle, TRUE);
         DrawRotaGraph(150, 0, 0.4, 0, Handle, TRUE);
         DrawRotaGraph(250, 0, 0.4, 0, Handle, TRUE);
@@ -214,132 +241,84 @@ DWORD WINAPI MainThread(LPVOID)
             }
         }
         else {
-            if (CheckHitKey(KEY_INPUT_D) != 0) {
+            if (CheckHitKey(KEY_INPUT_D) != 0 && releaseKey1) {
                 for (int i = 0; i < sizeof(notes) / sizeof(int); i++) {
                     double notePosition = (secTime + OFFSET) * 300;
                     for (int j = 0; j < i; j++)notePosition -= (double)divide / (double)notesBPM[j];
                     notePosition -= 422;
                     notePosition *= notesSpeed[i];
                     notePosition += 422;
-                    stricy = 0;
-                    if (notePosition > 422 - stricy3 && notePosition < 422 + stricy3) {
-                        if (notes[i] == 1) {
-                            notes[i] = 0;
-                            stricy = 3;
-                            PlaySoundMem(Press, DX_PLAYTYPE_BACK);
-                            break;
-                        }
+                    
+                    stricy = Judge(notePosition, notes[i], 1, stricy1, stricy2, stricy3);
+                    if (stricy != 0) {
+                        notes[i] = 0;
+                        break;
                     }
-                    else if (notePosition > 422 - stricy2 && notePosition < 422 + stricy2) {
-                        if (notes[i] == 1) {
-                            notes[i] = 0;
-                            stricy = 2;
-                            PlaySoundMem(Press, DX_PLAYTYPE_BACK);
-                            break;
-                        }
-                    }
-                    else if (notePosition > 422 - stricy1 && notePosition < 422 + stricy1) {
-                        if (notes[i] == 1) {
-                            notes[i] = 0;
-                            stricy = 1;
-                            break;
-                        }
-                    }
-                    if (stricy != 0)break;
                 }
+                PlaySoundMem(Press, DX_PLAYTYPE_BACK);
+                releaseKey1 = false;
             }
-            if (CheckHitKey(KEY_INPUT_F) != 0) {
-                for (int i = 0; i < sizeof(notes) / sizeof(int); i++) {
-                    double notePosition = (secTime + OFFSET) * 300;
-                    for (int j = 0; j < i; j++)notePosition -= (double)divide / (double)notesBPM[j];
-                    notePosition -= 422;
-                    notePosition *= notesSpeed[i];
-                    notePosition += 422;
-                    stricy = 0;
-                    if (notePosition > 422 - stricy3 && notePosition < 422 + stricy3) {
-                        if (notes[i] == 2) {
-                            notes[i] = 0;
-                            stricy = 3;
-                            PlaySoundMem(Press, DX_PLAYTYPE_BACK);
-                        }
-                    }
-                    else if (notePosition > 422 - stricy2 && notePosition < 422 + stricy2) {
-                        if (notes[i] == 2) {
-                            notes[i] = 0;
-                            stricy = 2;
-                            PlaySoundMem(Press, DX_PLAYTYPE_BACK);
-                        }
-                    }
-                    else if (notePosition > 422 - stricy1 && notePosition < 422 + stricy1) {
-                        if (notes[i] == 2) {
-                            notes[i] = 0;
-                            stricy = 1;
-                        }
-                    }
-                    if (stricy != 0)break;
-                }
+            else {
+                if (CheckHitKey(KEY_INPUT_D) == 0)releaseKey1 = true;
             }
-            if (CheckHitKey(KEY_INPUT_J) != 0) {
+            if (CheckHitKey(KEY_INPUT_F) != 0 && releaseKey2) {
                 for (int i = 0; i < sizeof(notes) / sizeof(int); i++) {
                     double notePosition = (secTime + OFFSET) * 300;
                     for (int j = 0; j < i; j++)notePosition -= (double)divide / (double)notesBPM[j];
                     notePosition -= 422;
                     notePosition *= notesSpeed[i];
                     notePosition += 422;
-                    stricy = 0;
-                    if (notePosition > 422 - stricy3 && notePosition < 422 + stricy3) {
-                        if (notes[i] == 3) {
-                            notes[i] = 0;
-                            stricy = 3;
-                            PlaySoundMem(Press, DX_PLAYTYPE_BACK);
-                        }
+                    stricy = Judge(notePosition, notes[i], 2, stricy1, stricy2, stricy3);
+                    if (stricy != 0) {
+                        notes[i] = 0;
+                        break;
                     }
-                    else if (notePosition > 422 - stricy2 && notePosition < 422 + stricy2) {
-                        if (notes[i] == 3) {
-                            notes[i] = 0;
-                            stricy = 2;
-                            PlaySoundMem(Press, DX_PLAYTYPE_BACK);
-                        }
-                    }
-                    else if (notePosition > 422 - stricy1 && notePosition < 422 + stricy1) {
-                        if (notes[i] == 3) {
-                            notes[i] = 0;
-                            stricy = 1;
-                        }
-                    }
-                    if (stricy != 0)break;
                 }
+                PlaySoundMem(Press, DX_PLAYTYPE_BACK);
+                releaseKey2 = false;
             }
-            if (CheckHitKey(KEY_INPUT_K) != 0) {
+            else {
+                if (CheckHitKey(KEY_INPUT_F) == 0)releaseKey2 = true;
+            }
+            if (CheckHitKey(KEY_INPUT_J) != 0 && releaseKey3) {
                 for (int i = 0; i < sizeof(notes) / sizeof(int); i++) {
                     double notePosition = (secTime + OFFSET) * 300;
                     for (int j = 0; j < i; j++)notePosition -= (double)divide / (double)notesBPM[j];
                     notePosition -= 422;
                     notePosition *= notesSpeed[i];
                     notePosition += 422;
-                    stricy = 0;
-                    if (notePosition > 422 - stricy3 && notePosition < 422 + stricy3) {
-                        if (notes[i] == 4) {
-                            notes[i] = 0;
-                            stricy = 3;
-                            PlaySoundMem(Press, DX_PLAYTYPE_BACK);
-                        }
+                    PlaySoundMem(Press, DX_PLAYTYPE_BACK);
+                    stricy = Judge(notePosition, notes[i], 3, stricy1, stricy2, stricy3);
+                    if (stricy != 0) {
+                        notes[i] = 0;
+                        break;
                     }
-                    else if (notePosition > 422 - stricy2 && notePosition < 422 + stricy2) {
-                        if (notes[i] == 4) {
-                            notes[i] = 0;
-                            stricy = 2;
-                            PlaySoundMem(Press, DX_PLAYTYPE_BACK);
-                        }
-                    }
-                    else if (notePosition > 422 - stricy1 && notePosition < 422 + stricy1) {
-                        if (notes[i] == 4) {
-                            notes[i] = 0;
-                            stricy = 1;
-                        }
-                    }
-                    if (stricy != 0)break;
                 }
+                PlaySoundMem(Press, DX_PLAYTYPE_BACK);
+                releaseKey3 = false;
+            }
+            else {
+                if (CheckHitKey(KEY_INPUT_J) == 0)releaseKey3 = true;
+            }
+            if (CheckHitKey(KEY_INPUT_K) != 0 && releaseKey4) {
+                for (int i = 0; i < sizeof(notes) / sizeof(int); i++) {
+                    double notePosition = (secTime + OFFSET) * 300;
+                    for (int j = 0; j < i; j++)notePosition -= (double)divide / (double)notesBPM[j];
+                    notePosition -= 422;
+                    notePosition *= notesSpeed[i];
+                    notePosition += 422;
+                    PlaySoundMem(Press, DX_PLAYTYPE_BACK);
+                    stricy = Judge(notePosition, notes[i], 4, stricy1, stricy2, stricy3);
+                    if (stricy != 0) {
+                        notes[i] = 0;
+                        break;
+                    }
+                }
+                PlaySoundMem(Press, DX_PLAYTYPE_BACK);
+                releaseKey4 = false;
+            }
+            else {
+                if(CheckHitKey(KEY_INPUT_K) == 0)releaseKey4 = true;
             }
         }
         fps.Wait();
