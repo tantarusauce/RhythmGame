@@ -3,7 +3,6 @@
 #include <fstream>
 #include <string>
 #include "DxLib.h"
-#include "FPS.cpp"
 
 volatile int EndFlag;
 
@@ -30,30 +29,41 @@ int Judge(int notePosition, int notesi, int x, int stricy1, int stricy2, int str
     return stricy;
 }
 
+int judgeAll(int sumx, float secTime, float OFFSET, float divide, float notesBPM[], float notesSpeed[], short notes[], int stricy1, int stricy2, int stricy3, int Press, int key) {
+    int stricy = 0;
+    for (int i = 0; i < sumx; i++) {
+        float notePosition = (secTime + OFFSET) * 300;
+        for (int j = 0; j < i; j++)notePosition -= divide / notesBPM[j];
+        stricy = Judge((int)((notePosition - 422) * notesSpeed[i] + 422), notes[i], key, stricy1, stricy2, stricy3);
+        if (stricy != 0) {
+            notes[i] = 0;
+            break;
+        }
+    }
+    PlaySoundMem(Press, DX_PLAYTYPE_BACK);
+    return stricy;
+}
+
+
 DWORD WINAPI MainThread(LPVOID)
 {
-    int stricy1 = 60, stricy2 = 40, stricy3 = 10, stricy = 0, divide = 4500, volume = 50;
+    int stricy1 = 60, stricy2 = 40, stricy3 = 10, stricy = 0, divide = 4500, volume = 50, sumx = 0;
     int Handle, Note, Music, Press;//データハンドル格納用変数
     bool releaseKey1 = true, releaseKey2 = true, releaseKey3 = true, releaseKey4 = true;
     double startTime = GetNowCount(), secTime = 0;;
     short notes[4096]{};
     float notesSpeed[4096]{}, notesBPM[4096]{};
     std::string comment[] = { "", "Miss", "Nice", "Wonderful" };
-
     Handle = LoadGraph("画像/guide.png", TRUE);
     Note = LoadGraph("画像/Note.png", TRUE);
     Press = LoadSoundMem("サウンド/タップ効果音.wav");
-
-    Fps fps;
     double OFFSET = 0;
     int MusicOFFSET = 0;
     float speed, BPM;
-    bool autoPlay = true;
+    bool autoPlay = false;
     bool MusicPlay = false;
-
     int noteTiming[4] = { 0,0,0,0 };
     std::string LINE = "";
-    int sumx = 0;
     std::ifstream file("Scores/夜の先へ.score");
     while (std::getline(file, LINE)) {
         if (LINE.find("Music:") != std::string::npos) {
@@ -103,36 +113,26 @@ DWORD WINAPI MainThread(LPVOID)
         if (ProcessMessage() != 0)break;
         double time = GetNowCount();
         secTime = (time - startTime) / 1000;
-        fps.Update();
-        fps.Draw();
         // 音量の設定
         ChangeVolumeSoundMem(255 * volume / 100, Music);
+        ChangeVolumeSoundMem(255 * volume / 100, Press);
         if (secTime > MusicOFFSET && !MusicPlay) {
             MusicPlay = true;
             PlaySoundMem(Music, DX_PLAYTYPE_BACK);
         }
-        if (MusicPlay) {
-            if (CheckSoundFile() != 0) {
-                break;
-            }
-        }
-        DrawRotaGraph(50, 0, 0.4, 0, Handle, TRUE);
-        DrawRotaGraph(150, 0, 0.4, 0, Handle, TRUE);
-        DrawRotaGraph(250, 0, 0.4, 0, Handle, TRUE);
-        DrawRotaGraph(350, 0, 0.4, 0, Handle, TRUE);
+        if (MusicPlay)if (CheckSoundFile() != 0)break;//止めようとしている
+        for (int i = 50; i <= 350; i += 100)DrawRotaGraph(i, 0, 0.4, 0, Handle, TRUE);
         DrawFormatString(500, 60, GetColor(0, 128, 255), comment[stricy].c_str(), secTime);
-        
         for (int i = sumx; i > 0 ; i--) {
             double notePosition = (secTime + OFFSET) * 300;
-            for (int j = 0; j < i; j++)notePosition -= (double)divide / (double)notesBPM[j];
+            for (int j = 0; j < i; j++)notePosition -= divide / notesBPM[j];
             notePosition = (notePosition - 422) * notesSpeed[i] + 422;
                 if (notePosition < 600 && notePosition > -30)DrawRotaGraph(50 + (notes[i] - 1) * 100, (int)notePosition, 0.35, 0, Note, TRUE);
         }
-
         if (autoPlay) {
             for (int i = 0; i < sumx; i++) {
-                double notePosition = (secTime + OFFSET) * 300;
-                for (int j = 0; j < i; j++)notePosition -= (double)divide / (double)notesBPM[j];
+                float notePosition = (secTime + OFFSET) * 300;
+                for (int j = 0; j < i; j++)notePosition -= divide / notesBPM[j];
                 if ((notePosition - 422) * notesSpeed[i] > 0) {
                     if (notes[i] != 0) {
                         notes[i] = 0;
@@ -143,95 +143,38 @@ DWORD WINAPI MainThread(LPVOID)
         }
         else {
             if (CheckHitKey(KEY_INPUT_D) != 0 && releaseKey1) {
-                for (int i = 0; i < sumx; i++) {
-                    double notePosition = (secTime + OFFSET) * 300;
-                    for (int j = 0; j < i; j++)notePosition -= (double)divide / (double)notesBPM[j];
-                    stricy = Judge((int)((notePosition - 422) * notesSpeed[i] + 422), notes[i], 1, stricy1, stricy2, stricy3);
-                    if (stricy != 0) {
-                        notes[i] = 0;
-                        break;
-                    }
-                }
-                PlaySoundMem(Press, DX_PLAYTYPE_BACK);
+                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, 1);
                 releaseKey1 = false;
             }
-            else {
-                if (CheckHitKey(KEY_INPUT_D) == 0)releaseKey1 = true;
-            }
             if (CheckHitKey(KEY_INPUT_F) != 0 && releaseKey2) {
-                for (int i = 0; i < sumx; i++) {
-                    double notePosition = (secTime + OFFSET) * 300;
-                    for (int j = 0; j < i; j++)notePosition -= (double)divide / (double)notesBPM[j];
-                    stricy = Judge((int)((notePosition - 422) * notesSpeed[i] + 422), notes[i], 2, stricy1, stricy2, stricy3);
-                    if (stricy != 0) {
-                        notes[i] = 0;
-                        break;
-                    }
-                }
-                PlaySoundMem(Press, DX_PLAYTYPE_BACK);
+                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, 2);
                 releaseKey2 = false;
             }
-            else {
-                if (CheckHitKey(KEY_INPUT_F) == 0)releaseKey2 = true;
-            }
             if (CheckHitKey(KEY_INPUT_J) != 0 && releaseKey3) {
-                for (int i = 0; i < sumx; i++) {
-                    double notePosition = (secTime + OFFSET) * 300;
-                    for (int j = 0; j < i; j++)notePosition -= (double)divide / (double)notesBPM[j];
-                    PlaySoundMem(Press, DX_PLAYTYPE_BACK);
-                    stricy = Judge((int)((notePosition - 422) * notesSpeed[i] + 422), notes[i], 3, stricy1, stricy2, stricy3);
-                    if (stricy != 0) {
-                        notes[i] = 0;
-                        break;
-                    }
-                }
-                PlaySoundMem(Press, DX_PLAYTYPE_BACK);
+                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, 3);
                 releaseKey3 = false;
             }
-            else {
-                if (CheckHitKey(KEY_INPUT_J) == 0)releaseKey3 = true;
-            }
             if (CheckHitKey(KEY_INPUT_K) != 0 && releaseKey4) {
-                for (int i = 0; i < sumx; i++) {
-                    double notePosition = (secTime + OFFSET) * 300;
-                    for (int j = 0; j < i; j++)notePosition -= (double)divide / (double)notesBPM[j];
-                    PlaySoundMem(Press, DX_PLAYTYPE_BACK);
-                    stricy = Judge((int)((notePosition - 422) * notesSpeed[i] + 422), notes[i], 4, stricy1, stricy2, stricy3);
-                    if (stricy != 0) {
-                        notes[i] = 0;
-                        break;
-                    }
-                }
-                PlaySoundMem(Press, DX_PLAYTYPE_BACK);
+                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, 4);
                 releaseKey4 = false;
             }
-            else {
-                if(CheckHitKey(KEY_INPUT_K) == 0)releaseKey4 = true;
-            }
+            releaseKey1 = (CheckHitKey(KEY_INPUT_D) == 0);
+            releaseKey2 = (CheckHitKey(KEY_INPUT_F) == 0);
+            releaseKey3 = (CheckHitKey(KEY_INPUT_J) == 0);
+            releaseKey4 = (CheckHitKey(KEY_INPUT_K) == 0);
         }
-        fps.Wait();
-        //while (1);
     }
     return 0;
 }
 
 int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
-    ChangeWindowMode(TRUE);
-    SetAlwaysRunFlag(true);
-    DxLib_Init();
-    SetDrawScreen(DX_SCREEN_BACK);
+    ChangeWindowMode(TRUE), SetAlwaysRunFlag(TRUE), DxLib_Init(), SetDrawScreen(DX_SCREEN_BACK);
     HANDLE hand;
     DWORD id;
     hand = CreateThread(NULL, 0, MainThread, 0, 0, &id);
-    while (ProcessMessage() == 0)
-    {
-        Sleep(10);
-    }
+    while (ProcessMessage() == 0)Sleep(10);
     EndFlag = 1;
-    while (EndFlag == 0)
-    {
-        Sleep(10);
-    }
+    while (EndFlag == 0)Sleep(10);
     DxLib_End();
     return 0;
 }
