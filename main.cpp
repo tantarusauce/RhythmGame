@@ -3,33 +3,23 @@
 #include <fstream>
 #include <string>
 #include "DxLib.h"
-
 volatile int EndFlag;
 
 int Judge(int notePosition, int notesi, int x, int stricy1, int stricy2, int stricy3) {
     int stricy = 0;
     if (notePosition > 422 - stricy3 && notePosition < 422 + stricy3) {
-        if (notesi == x) {
-            notesi = 0;
-            stricy = 3;
-        }
+        if (notesi == x)stricy = 3;
     }
     else if (notePosition > 422 - stricy2 && notePosition < 422 + stricy2) {
-        if (notesi == x) {
-            notesi = 0;
-            stricy = 2;
-        }
+        if (notesi == x)stricy = 2;
     }
     else if (notePosition > 422 - stricy1 && notePosition < 422 + stricy1) {
-        if (notesi == x) {
-            notesi = 0;
-            stricy = 1;
-        }
+        if (notesi == x)stricy = 1;
     }
     return stricy;
 }
 
-int judgeAll(int sumx, float secTime, float OFFSET, float divide, float notesBPM[], float notesSpeed[], short notes[], int stricy1, int stricy2, int stricy3, int Press, int key) {
+int judgeAll(int sumx, float secTime, float OFFSET, float divide, float notesBPM[], float notesSpeed[], short notes[], int stricy1, int stricy2, int stricy3, int Press, int noteTiming[], int key) {
     int stricy = 0;
     for (int i = 0; i < sumx; i++) {
         float notePosition = (secTime + OFFSET) * 300;
@@ -37,6 +27,7 @@ int judgeAll(int sumx, float secTime, float OFFSET, float divide, float notesBPM
         stricy = Judge((int)((notePosition - 422) * notesSpeed[i] + 422), notes[i], key, stricy1, stricy2, stricy3);
         if (stricy != 0) {
             notes[i] = 0;
+            noteTiming[stricy]++;
             break;
         }
     }
@@ -44,10 +35,9 @@ int judgeAll(int sumx, float secTime, float OFFSET, float divide, float notesBPM
     return stricy;
 }
 
-
 DWORD WINAPI MainThread(LPVOID)
 {
-    int stricy1 = 60, stricy2 = 40, stricy3 = 10, stricy = 0, divide = 4500, volume = 50, sumx = 0;
+    int stricy1 = 60, stricy2 = 40, stricy3 = 10, stricy = 0, divide = 4500, volume = 20, sumx = 0;
     int Handle, Note, Music, Press;//ƒf[ƒ^ƒnƒ“ƒhƒ‹Ši”[—p•Ï”
     bool releaseKey1 = true, releaseKey2 = true, releaseKey3 = true, releaseKey4 = true;
     double startTime = GetNowCount(), secTime = 0;;
@@ -60,7 +50,7 @@ DWORD WINAPI MainThread(LPVOID)
     double OFFSET = 0;
     int MusicOFFSET = 0;
     float speed, BPM;
-    bool autoPlay = false;
+    bool autoPlay = true;
     bool MusicPlay = false;
     int noteTiming[4] = { 0,0,0,0 };
     std::string LINE = "";
@@ -122,7 +112,10 @@ DWORD WINAPI MainThread(LPVOID)
         }
         if (MusicPlay)if (CheckSoundFile() != 0)break;//Ž~‚ß‚æ‚¤‚Æ‚µ‚Ä‚¢‚é
         for (int i = 50; i <= 350; i += 100)DrawRotaGraph(i, 0, 0.4, 0, Handle, TRUE);
-        DrawFormatString(500, 60, GetColor(0, 128, 255), comment[stricy].c_str(), secTime);
+        DrawFormatString(500, 50, GetColor(0, 128, 255), comment[stricy].c_str());
+        DrawFormatString(500, 90, GetColor(128, 64, 255), ( "     Miss:" + std::to_string(noteTiming[0]+noteTiming[1])).c_str());
+        DrawFormatString(500, 110, GetColor(128, 64, 255), ("     Nice:" + std::to_string(noteTiming[2])).c_str());
+        DrawFormatString(500, 130, GetColor(128, 64, 255), ("Wonderful:" + std::to_string(noteTiming[3])).c_str());
         for (int i = sumx; i > 0 ; i--) {
             double notePosition = (secTime + OFFSET) * 300;
             for (int j = 0; j < i; j++)notePosition -= divide / notesBPM[j];
@@ -143,19 +136,19 @@ DWORD WINAPI MainThread(LPVOID)
         }
         else {
             if (CheckHitKey(KEY_INPUT_D) != 0 && releaseKey1) {
-                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, 1);
+                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, noteTiming, 1);
                 releaseKey1 = false;
             }
             if (CheckHitKey(KEY_INPUT_F) != 0 && releaseKey2) {
-                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, 2);
+                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, noteTiming, 2);
                 releaseKey2 = false;
             }
             if (CheckHitKey(KEY_INPUT_J) != 0 && releaseKey3) {
-                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, 3);
+                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, noteTiming, 3);
                 releaseKey3 = false;
             }
             if (CheckHitKey(KEY_INPUT_K) != 0 && releaseKey4) {
-                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, 4);
+                stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, noteTiming, 4);
                 releaseKey4 = false;
             }
             releaseKey1 = (CheckHitKey(KEY_INPUT_D) == 0);
