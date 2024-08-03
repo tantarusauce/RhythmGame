@@ -1,8 +1,8 @@
-/*------------------------------+
-| ãŸã‚“ãŸã‚‹ãƒªã‚ºãƒ ã‚ã©ã¹ã‚“ã¡ã‚ƒï½ã€€ |
-|                         ã€€ã€€  |
-|      ã€€2024 ãŸã‚“ãŸã‚‹ããƒ¼ã™ã€€  |
-+------------------------------*/
+/*-------------------------+
+| ‚½‚ñ‚½‚éƒŠƒYƒ€‚ ‚Ç‚×‚ñ‚¿‚á`@|
+|                          |
+|      @2024 ‚½‚ñ‚½‚é‚»[‚·@|
++--------------------------+*/
 
 #include <math.h>
 #include <iostream>
@@ -42,15 +42,15 @@ int judgeAll(int sumx, float secTime, float OFFSET, float divide, float notesBPM
 }
 
 void Graph(int Handle, std::string comment[], int stricy, int noteTiming[], int sumx, double secTime, double OFFSET, float divide, float notesBPM[], float notesSpeed[], short notes[], int Note, bool playing) {
-    //ãƒãƒ¼ãƒˆã‚¬ã‚¤ãƒ‰æ†‘ä¾
+    //ƒm[ƒgƒKƒCƒhœßˆË
     for (int i = 50; i <= 350; i += 100)DrawRotaGraph(i, 0, 0.4, 0, Handle, TRUE);
-    //ã‚³ãƒ¡ãƒ³ãƒˆè¡¨ç¤º
+    //ƒRƒƒ“ƒg•\¦
     DrawFormatString(500, 50, GetColor(0, 128, 255), comment[stricy].c_str());
     DrawFormatString(500, 90, GetColor(128, 64, 255), ("     Miss:" + std::to_string(noteTiming[0] + noteTiming[1])).c_str());
     DrawFormatString(500, 110, GetColor(128, 64, 255), ("     Nice:" + std::to_string(noteTiming[2])).c_str());
     DrawFormatString(500, 130, GetColor(128, 64, 255), ("Wonderful:" + std::to_string(noteTiming[3])).c_str());
     if (!playing)DrawFormatString(450, 200, GetColor(255, 255, 255), "Pless Space to Play");
-    //ãƒãƒ¼ãƒˆã®è¡¨ç¤º
+    //ƒm[ƒg‚Ì•\¦
     for (int i = sumx; i > 0; i--) {
         float notePosition = (secTime + OFFSET) * 300;
         for (int j = 0; j < i; j++)notePosition -= divide / notesBPM[j];
@@ -61,19 +61,19 @@ void Graph(int Handle, std::string comment[], int stricy, int noteTiming[], int 
 
 DWORD WINAPI MainThread(LPVOID)
 {
-    //å¤‰æ•°ãƒ»å®šæ•°ã®è¨­å®š
+    //•Ï”E’è”‚Ìİ’è
     bool autoPlay = true;
     int stricy1 = 60, stricy2 = 40, stricy3 = 10, stricy = 0, divide = 4500, volume = 50, sumx = 0;
     int pauseSelect = 0, MusicTime = 0;
-    int Handle, Note, Music, Press;//ãƒ‡ãƒ¼ã‚¿ãƒãƒ³ãƒ‰ãƒ«æ ¼ç´ç”¨å¤‰æ•°
+    int Handle, Note, Music, Press;//ƒf[ƒ^ƒnƒ“ƒhƒ‹Ši”[—p•Ï”
     bool releaseKey1 = true, releaseKey2 = true, releaseKey3 = true, releaseKey4 = true, pause = false;
     double startTime = 0, secTime = 0, pauseStartTime = 0, pauseEndTime = 0;
     short notes[4096]{};
     float notesSpeed[4096]{}, notesBPM[4096]{};
     std::string comment[] = { "", "Miss", "Nice", "Wonderful" };
-    Handle = LoadGraph("ç”»åƒ/guide.png", TRUE);
-    Note = LoadGraph("ç”»åƒ/Note.png", TRUE);
-    Press = LoadSoundMem("ã‚µã‚¦ãƒ³ãƒ‰/ã‚¿ãƒƒãƒ—åŠ¹æœéŸ³.wav");
+    Handle = LoadGraph("‰æ‘œ/guide.png", TRUE);
+    Note = LoadGraph("‰æ‘œ/Note.png", TRUE);
+    Press = LoadSoundMem("ƒTƒEƒ“ƒh/ƒ^ƒbƒvŒø‰Ê‰¹.wav");
     double OFFSET = 0;
     int MusicOFFSET = 0;
     float speed, BPM;
@@ -81,48 +81,48 @@ DWORD WINAPI MainThread(LPVOID)
     int noteTiming[4] = { 0,0,0,0 };
     std::string LINE = "";
     
-    //èª­ã¿è¾¼ã‚€ãƒ•ã‚¡ã‚¤ãƒ«å
-    std::ifstream file("Scores/å¤œã®å…ˆã¸.score");
+    //“Ç‚İ‚Şƒtƒ@ƒCƒ‹–¼
+    std::ifstream file("Scores/–é‚Ìæ‚Ö.score");
 
-    //ãƒ•ã‚¡ã‚¤ãƒ«èª­ã¿è¾¼ã¿
+    //ƒtƒ@ƒCƒ‹“Ç‚İ‚İ
     while (std::getline(file, LINE)) {
         if (LINE.find("Music:") != std::string::npos) {
-            //ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã€ŒMusic:ã€å¾Œã®ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã®èª­ã¿å–ã‚Š
+            //ƒL[ƒ[ƒhuMusic:vŒã‚ÌƒL[ƒ[ƒh‚Ì“Ç‚İæ‚è
             size_t position = LINE.find("Music:");
-            std::string MusicFile = "ã‚µã‚¦ãƒ³ãƒ‰/" + LINE.substr(position + 6);
+            std::string MusicFile = "ƒTƒEƒ“ƒh/Music/" + LINE.substr(position + 6);
             Music = LoadSoundMem(MusicFile.c_str());
             continue;
         }
         else if (LINE.find("BPM:") != std::string::npos) {
-            //ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã€ŒBPM:ã€å¾Œã®æ•°å€¤ã®èª­ã¿å–ã‚Š
+            //ƒL[ƒ[ƒhuBPM:vŒã‚Ì”’l‚Ì“Ç‚İæ‚è
             size_t position = LINE.find("BPM:");
             std::string sBPM = LINE.substr(position + 4);
             BPM = stof(sBPM);
             continue;
         }
         else if (LINE.find("Speed:") != std::string::npos) {
-            //ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã€ŒSpeed:ã€å¾Œã®æ•°å€¤ã®èª­ã¿å–ã‚Š
+            //ƒL[ƒ[ƒhuSpeed:vŒã‚Ì”’l‚Ì“Ç‚İæ‚è
             size_t position = LINE.find("Speed:");
             std::string Speed = LINE.substr(position + 6);
             speed = stof(Speed);
             continue;
         }
         else if (LINE.find("Offset:") != std::string::npos) {
-            //ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã€ŒOffset:ã€å¾Œã®æ•°å€¤ã®èª­ã¿å–ã‚Š
+            //ƒL[ƒ[ƒhuOffset:vŒã‚Ì”’l‚Ì“Ç‚İæ‚è
             size_t position = LINE.find("Offset:");
             std::string Offset = LINE.substr(position + 7);
             OFFSET = stod(Offset);
             continue;
         }
         else if (LINE.find("Musicoffset:") != std::string::npos) {
-            //ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã€ŒMusicoffset:ã€å¾Œã®æ•°å€¤ã®èª­ã¿å–ã‚Š
+            //ƒL[ƒ[ƒhuMusicoffset:vŒã‚Ì”’l‚Ì“Ç‚İæ‚è
             size_t position = LINE.find("Musicoffset:");
             std::string MusicOffset = LINE.substr(position + 12);
             MusicOFFSET = stoi(MusicOffset);
             continue;
         }
         else {
-            //æ•°å€¤ã®èª­ã¿å–ã‚Š
+            //”’l‚Ì“Ç‚İæ‚è
             int x = 0;
             while (LINE[x] != '\0') {
                 notes[sumx] = LINE[x] - '0';
@@ -134,28 +134,28 @@ DWORD WINAPI MainThread(LPVOID)
         }
     }
 
-    //ã‚²ãƒ¼ãƒ ãƒ«ãƒ¼ãƒ—é–¢æ•°
+    //ƒQ[ƒ€ƒ‹[ƒvŠÖ”
     while (ScreenFlip() == 0 && ProcessMessage() == 0 && ClearDrawScreen() == 0) {
         if (pause == false) {
-            if (ProcessMessage() != 0)break;//ã‚¨ãƒ©ãƒ¼æ™‚ã«çµ‚äº†
-            double time = GetNowCount();//æ™‚é–“ã‚’è¨ˆæ¸¬
+            if (ProcessMessage() != 0)break;//ƒGƒ‰[‚ÉI—¹
+            double time = GetNowCount();//ŠÔ‚ğŒv‘ª
             if (playing)secTime = (time - startTime) / 1000;
-            // éŸ³é‡ã®è¨­å®š
+            // ‰¹—Ê‚Ìİ’è
             ChangeVolumeSoundMem(255 * volume / 100, Music);
             ChangeVolumeSoundMem(255 * volume / 100, Press);
-            //ã‚µã‚¦ãƒ³ãƒ‰ã®å†ç”Ÿ
+            //ƒTƒEƒ“ƒh‚ÌÄ¶
             if (secTime > MusicOFFSET && !MusicPlay) {
                 MusicPlay = true;
                 PlaySoundMem(Music, DX_PLAYTYPE_BACK);
             }
-            //ã‚¹ãƒšãƒ¼ã‚¹ã‚­ãƒ¼ã§é–‹å§‹
+            //ƒXƒy[ƒXƒL[‚ÅŠJn
             if (CheckHitKey(KEY_INPUT_SPACE) && !MusicPlay) { startTime = GetNowCount(); playing = true; }
-            //æç”»æ¶ˆå»
+            //•`‰æÁ‹
             ClearDrawScreen();
-            //æç”»å‡¦ç†
+            //•`‰æˆ—
             Graph(Handle, comment, stricy, noteTiming, sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, Note, playing);
             if (autoPlay) {
-                //ã‚ªãƒ¼ãƒˆãƒ—ãƒ¬ã‚¤ã‚ªãƒ³æ™‚ã®å‡¦ç†
+                //ƒI[ƒgƒvƒŒƒCƒIƒ“‚Ìˆ—
                 for (int i = 0; i < sumx; i++) {
                     float notePosition = (secTime + OFFSET) * 300;
                     for (int j = 0; j < i; j++)notePosition -= divide / notesBPM[j];
@@ -169,34 +169,34 @@ DWORD WINAPI MainThread(LPVOID)
                 }
             }
             else {
-                //ã‚ªãƒ¼ãƒˆãƒ—ãƒ¬ã‚¤ã‚ªãƒ•æ™‚ã®å‡¦ç†
-                //Dã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸæ™‚ã®åˆ¤å®š
+                //ƒI[ƒgƒvƒŒƒCƒIƒt‚Ìˆ—
+                //DƒL[‚ª‰Ÿ‚³‚ê‚½‚Ì”»’è
                 if (CheckHitKey(KEY_INPUT_D) != 0 && releaseKey1) {
                     stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, noteTiming, 1);
                     releaseKey1 = false;
                 }
-                //Fã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸæ™‚ã®åˆ¤å®š
+                //FƒL[‚ª‰Ÿ‚³‚ê‚½‚Ì”»’è
                 if (CheckHitKey(KEY_INPUT_F) != 0 && releaseKey2) {
                     stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, noteTiming, 2);
                     releaseKey2 = false;
                 }
-                //Jã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸæ™‚ã®åˆ¤å®š
+                //JƒL[‚ª‰Ÿ‚³‚ê‚½‚Ì”»’è
                 if (CheckHitKey(KEY_INPUT_J) != 0 && releaseKey3) {
                     stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, noteTiming, 3);
                     releaseKey3 = false;
                 }
-                //Kã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸæ™‚ã®åˆ¤å®š
+                //KƒL[‚ª‰Ÿ‚³‚ê‚½‚Ì”»’è
                 if (CheckHitKey(KEY_INPUT_K) != 0 && releaseKey4) {
                     stricy = judgeAll(sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, stricy1, stricy2, stricy3, Press, noteTiming, 4);
                     releaseKey4 = false;
                 }
-                releaseKey1 = (CheckHitKey(KEY_INPUT_D) == 0);//Dã‚­ãƒ¼ãŒé›¢ã•ã‚ŒãŸæ™‚ã®ãƒ•ãƒ©ã‚°
-                releaseKey2 = (CheckHitKey(KEY_INPUT_F) == 0);//Fã‚­ãƒ¼ãŒé›¢ã•ã‚ŒãŸæ™‚ã®ãƒ•ãƒ©ã‚°
-                releaseKey3 = (CheckHitKey(KEY_INPUT_J) == 0);//Jã‚­ãƒ¼ãŒé›¢ã•ã‚ŒãŸæ™‚ã®ãƒ•ãƒ©ã‚°
-                releaseKey4 = (CheckHitKey(KEY_INPUT_K) == 0);//Kã‚­ãƒ¼ãŒé›¢ã•ã‚ŒãŸæ™‚ã®ãƒ•ãƒ©ã‚°
+                releaseKey1 = (CheckHitKey(KEY_INPUT_D) == 0);//DƒL[‚ª—£‚³‚ê‚½‚Ìƒtƒ‰ƒO
+                releaseKey2 = (CheckHitKey(KEY_INPUT_F) == 0);//FƒL[‚ª—£‚³‚ê‚½‚Ìƒtƒ‰ƒO
+                releaseKey3 = (CheckHitKey(KEY_INPUT_J) == 0);//JƒL[‚ª—£‚³‚ê‚½‚Ìƒtƒ‰ƒO
+                releaseKey4 = (CheckHitKey(KEY_INPUT_K) == 0);//KƒL[‚ª—£‚³‚ê‚½‚Ìƒtƒ‰ƒO
             }
             if (CheckHitKey(KEY_INPUT_ESCAPE) != 0) {
-                //ESCã§ä¸­æ–­å‡¦ç†ã‚’ã“ã“ã«æ›¸ã
+                //ESC‚Å’†’fˆ—‚ğ‚±‚±‚É‘‚­
                 pause = true;
                 MusicTime = GetCurrentPositionSoundMem(Music);
                 StopSoundMem(Music);
@@ -205,10 +205,10 @@ DWORD WINAPI MainThread(LPVOID)
         }
         else {
             Graph(Handle, comment, stricy, noteTiming, sumx, secTime, OFFSET, divide, notesBPM, notesSpeed, notes, Note, playing);
-            //ãƒãƒ¼ã‚ºä¸­å‡¦ç†
+            //ƒ|[ƒY’†ˆ—
             if (CheckHitKey(KEY_INPUT_SPACE) != 0) {
                 if (pauseSelect == 0) {
-                    //ãƒãƒ¼ã‚ºã‚»ãƒ¬ã‚¯ãƒˆï¼ç•ªï¼ˆã‚²ãƒ¼ãƒ ã«æˆ»ã‚‹ï¼‰ãŒã‚»ãƒ¬ã‚¯ãƒˆã•ã‚ŒãŸæ™‚
+                    //ƒ|[ƒYƒZƒŒƒNƒg‚O”ÔiƒQ[ƒ€‚É–ß‚éj‚ªƒZƒŒƒNƒg‚³‚ê‚½
                     pause = false;
                     pauseEndTime = GetNowCount();
                     startTime += pauseEndTime - pauseStartTime + 21;
@@ -221,7 +221,7 @@ DWORD WINAPI MainThread(LPVOID)
         return 0;
 }
 
-//ãƒ¡ã‚¤ãƒ³é–¢æ•°
+//ƒƒCƒ“ŠÖ”
 int WINAPI WinMain(HINSTANCE,HINSTANCE,LPSTR,int){
     ChangeWindowMode(TRUE), SetAlwaysRunFlag(TRUE), DxLib_Init(), SetDrawScreen(DX_SCREEN_BACK);
     HANDLE hand;
